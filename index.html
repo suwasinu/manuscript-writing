@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manuscript Writing with AI — Interactive Toolkit</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1e2238; --ink:#e8ebf5;
+    --muted:#9aa3c0; --accent:#6c8cff; --accent2:#36d1b7; --warn:#ff6b6b;
+    --good:#36d17a; --line:#2a2f4a; --chip:#242a44;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+    background:linear-gradient(160deg,#0d1020,#141832 60%,#0d1020);color:var(--ink);line-height:1.5}
+  header{padding:34px 22px 18px;text-align:center;border-bottom:1px solid var(--line)}
+  header h1{margin:0 0 6px;font-size:30px;letter-spacing:.3px}
+  header p{margin:0;color:var(--muted)}
+  .wrap{max-width:980px;margin:0 auto;padding:18px 16px 60px}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:18px 0 6px;position:sticky;top:0;
+    background:rgba(13,16,32,.85);backdrop-filter:blur(6px);padding:10px;border-radius:14px;z-index:5}
+  .tab{padding:9px 14px;border-radius:999px;background:var(--chip);color:var(--ink);cursor:pointer;
+    border:1px solid var(--line);font-size:14px;user-select:none;transition:.15s}
+  .tab:hover{border-color:var(--accent)}
+  .tab.active{background:var(--accent);border-color:var(--accent);color:#0b1020;font-weight:600}
+  section{display:none;animation:fade .25s ease}
+  section.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;margin:16px 0}
+  h2{font-size:21px;margin:4px 0 14px}
+  h3{font-size:16px;color:var(--accent2);margin:18px 0 8px}
+  label{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}
+  select,input,textarea{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+    border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit}
+  textarea{min-height:70px;resize:vertical}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .row>div{flex:1;min-width:200px}
+  button.gen{margin-top:16px;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#06111a;
+    border:0;border-radius:10px;padding:12px 18px;font-weight:700;cursor:pointer;font-size:15px}
+  .out{margin-top:16px;background:#0b0e1c;border:1px dashed var(--accent);border-radius:12px;padding:16px;
+    white-space:pre-wrap;font-family:"Cascadia Code",Consolas,monospace;font-size:13.5px;color:#d7e0ff}
+  .copy{margin-top:10px;background:var(--chip);border:1px solid var(--line);color:var(--ink);border-radius:8px;
+    padding:7px 12px;cursor:pointer;font-size:13px}
+  .copy:hover{border-color:var(--accent2)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:680px){.grid{grid-template-columns:1fr}}
+  .do,.dont{border-radius:12px;padding:14px 16px}
+  .do{background:rgba(54,209,122,.08);border:1px solid rgba(54,209,122,.4)}
+  .dont{background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.4)}
+  .do h3{color:var(--good);margin-top:0}.dont h3{color:var(--warn);margin-top:0}
+  ul{margin:6px 0;padding-left:20px}li{margin:5px 0}
+  .check{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--panel2);
+    border:1px solid var(--line);border-radius:10px;margin:8px 0;cursor:pointer}
+  .check input{width:18px;height:18px;margin-top:2px;accent-color:var(--accent2)}
+  .check.ticked{border-color:var(--good);background:rgba(54,209,122,.07)}
+  .check span b{display:block}.check span small{color:var(--muted)}
+  .bar{height:10px;background:var(--panel2);border-radius:999px;overflow:hidden;margin:14px 0 4px}
+  .bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--good));transition:.3s}
+  .pill{display:inline-block;background:var(--chip);border:1px solid var(--line);border-radius:999px;
+    padding:4px 11px;font-size:12px;margin:3px 4px 0 0;color:var(--muted)}
+  .stage{display:flex;gap:12px;align-items:flex-start;margin:12px 0;padding:12px 14px;background:var(--panel2);
+    border:1px solid var(--line);border-radius:12px}
+  .stage .n{flex:0 0 30px;height:30px;border-radius:50%;background:var(--accent);color:#06111a;
+    display:flex;align-items:center;justify-content:center;font-weight:700}
+  .note{font-size:12.5px;color:var(--muted);margin-top:6px}
+  footer{text-align:center;color:var(--muted);font-size:12.5px;padding:20px}
+  .warnbox{background:rgba(255,107,107,.09);border:1px solid rgba(255,107,107,.45);border-radius:12px;padding:14px 16px;margin-top:14px}
+</style>
+</head>
+<body>
+<header>
+  <h1>✍️ Manuscript Writing with AI</h1>
+  <p>An interactive toolkit — prompts, workflow, ethics & guardrails for researchers</p>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <div class="tab active" data-t="builder">🧪 Prompt Builder</div>
+    <div class="tab" data-t="workflow">🔄 Workflow</div>
+    <div class="tab" data-t="dos">✅ Do / Don't</div>
+    <div class="tab" data-t="ethics">🛡️ Ethics Checklist</div>
+    <div class="tab" data-t="prompts">📋 Prompt Library</div>
+  </div>
+
+  <!-- ===== PROMPT BUILDER ===== -->
+  <section class="active" id="builder">
+    <div class="card">
+      <h2>Build a strong manuscript prompt</h2>
+      <p class="note">Good AI output needs <b>role + task + context + constraints</b>. Fill these in and copy the result.</p>
+      <div class="row">
+        <div>
+          <label>1. Manuscript section</label>
+          <select id="b_section">
+            <option>Title & abstract</option>
+            <option>Introduction</option>
+            <option>Methods</option>
+            <option>Results (from my numbers)</option>
+            <option>Discussion</option>
+            <option>Limitations</option>
+            <option>Response to reviewers</option>
+            <option>Cover letter to editor</option>
+            <option>Plain-language summary</option>
+          </select>
+        </div>
+        <div>
+          <label>2. What do you want AI to do?</label>
+          <select id="b_task">
+            <option>Draft from my notes</option>
+            <option>Improve clarity & flow</option>
+            <option>Make it more concise</option>
+            <option>Fix grammar & academic tone</option>
+            <option>Critique like a peer reviewer</option>
+            <option>Restructure for logical flow</option>
+            <option>Check argument consistency</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>3. Target journal / style</label>
+          <input id="b_journal" placeholder="e.g. NEJM, IMRaD, Vancouver, 250-word limit">
+        </div>
+        <div>
+          <label>4. Field / topic</label>
+          <input id="b_field" placeholder="e.g. kidney transplantation, ABO-incompatible">
+        </div>
+      </div>
+      <label>5. Your raw material (paste notes, bullet points, or draft text)</label>
+      <textarea id="b_material" placeholder="Paste your messy notes / data / rough draft here..."></textarea>
+      <label>6. Constraints (optional)</label>
+      <input id="b_constraints" placeholder="e.g. keep my citations, don't invent references, formal tone, 300 words">
+      <button class="gen" onclick="buildPrompt()">⚡ Generate prompt</button>
+      <div class="out" id="b_out">Your tailored prompt appears here…</div>
+      <button class="copy" onclick="copyOut('b_out')">📋 Copy prompt</button>
+    </div>
+  </section>
+
+  <!-- ===== WORKFLOW ===== -->
+  <section id="workflow">
+    <div class="card">
+      <h2>The AI-assisted manuscript workflow</h2>
+      <p class="note">AI is a co-pilot at every stage — but <b>you</b> stay the author and the verifier.</p>
+      <div class="stage"><div class="n">1</div><div><b>Plan & outline</b><br><small class="note">Brainstorm the story, build an IMRaD skeleton, define the key message. AI = sounding board.</small></div></div>
+      <div class="stage"><div class="n">2</div><div><b>Draft section-by-section</b><br><small class="note">Feed AI your data/notes for each section. Never ask it to invent results or references.</small></div></div>
+      <div class="stage"><div class="n">3</div><div><b>Revise & tighten</b><br><small class="note">Clarity, flow, conciseness, academic tone, journal word limits. AI = best at this.</small></div></div>
+      <div class="stage"><div class="n">4</div><div><b>Self-review</b><br><small class="note">Ask AI to role-play a harsh Reviewer 2. Find gaps before the journal does.</small></div></div>
+      <div class="stage"><div class="n">5</div><div><b>VERIFY everything</b><br><small class="note">Check every fact, number, and citation against the original source. AI hallucinates references.</small></div></div>
+      <div class="stage"><div class="n">6</div><div><b>Polish & submit</b><br><small class="note">Cover letter, plain-language summary, response to reviewers. Disclose AI use per journal policy.</small></div></div>
+      <div class="warnbox">⚠️ <b>The golden rule:</b> AI accelerates the writing, not the thinking. You are accountable for every word, number, and citation in the final manuscript.</div>
+    </div>
+  </section>
+
+  <!-- ===== DO / DON'T ===== -->
+  <section id="dos">
+    <div class="card">
+      <h2>Do & Don't</h2>
+      <div class="grid">
+        <div class="do">
+          <h3>✅ DO use AI to…</h3>
+          <ul>
+            <li>Improve clarity, flow & grammar</li>
+            <li>Tighten wordy text to journal limits</li>
+            <li>Translate / polish non-native English</li>
+            <li>Outline & structure your argument</li>
+            <li>Brainstorm titles and key messages</li>
+            <li>Simulate a peer reviewer's critique</li>
+            <li>Draft cover letters & reviewer responses</li>
+            <li>Explain a stats concept or reviewer comment</li>
+          </ul>
+        </div>
+        <div class="dont">
+          <h3>⛔ DON'T let AI…</h3>
+          <ul>
+            <li>Invent data, results, or p-values</li>
+            <li>Generate citations (it hallucinates them!)</li>
+            <li>Be listed as an author</li>
+            <li>Replace your reading of the literature</li>
+            <li>Write conclusions your data don't support</li>
+            <li>Process confidential/patient data in public tools</li>
+            <li>Make clinical or causal claims unchecked</li>
+            <li>Go undisclosed if the journal requires it</li>
+          </ul>
+        </div>
+      </div>
+      <div class="warnbox">🔍 <b>#1 risk = fake references.</b> AI confidently produces real-looking citations that don't exist. Verify <i>every single one</i> in PubMed / the actual journal before submitting.</div>
+    </div>
+  </section>
+
+  <!-- ===== ETHICS CHECKLIST ===== -->
+  <section id="ethics">
+    <div class="card">
+      <h2>Pre-submission ethics & integrity check</h2>
+      <p class="note">Tick each item before you submit. Score updates live.</p>
+      <div class="bar"><i id="ebar"></i></div>
+      <p id="escore" class="note" style="margin-top:0">0 / 8 complete</p>
+      <div id="checks"></div>
+    </div>
+  </section>
+
+  <!-- ===== PROMPT LIBRARY ===== -->
+  <section id="prompts">
+    <div class="card">
+      <h2>Copy-paste prompt library</h2>
+      <p class="note">Battle-tested prompts. Click any to copy.</p>
+      <div id="lib"></div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  Made as a free handout for a talk on Manuscript Writing with AI · Open in any browser · No data leaves this page
+  <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line);color:var(--ink)">
+    <b>Suwasin Udomkarnjananun, MD, PhD</b><br>
+    <span style="color:var(--muted)">Division of Nephrology, Department of Medicine, Faculty of Medicine,<br>
+    Chulalongkorn University and King Chulalongkorn Memorial Hospital, Bangkok, Thailand</span>
+  </div>
+</footer>
+
+<script>
+// tabs
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('section').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');document.getElementById(t.dataset.t).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+// prompt builder
+function buildPrompt(){
+  const sec=document.getElementById('b_section').value;
+  const task=document.getElementById('b_task').value;
+  const jour=document.getElementById('b_journal').value||'a peer-reviewed journal (IMRaD, Vancouver style)';
+  const field=document.getElementById('b_field').value||'[your field]';
+  const mat=document.getElementById('b_material').value.trim();
+  const con=document.getElementById('b_constraints').value;
+  let p=`You are an experienced academic editor and co-author in ${field}.\n\n`;
+  p+=`TASK: ${task} for the "${sec}" section of my manuscript, intended for ${jour}.\n\n`;
+  p+=`CONTEXT / MY RAW MATERIAL:\n${mat? '"""\n'+mat+'\n"""':'[paste your notes, data, or rough draft here]'}\n\n`;
+  p+=`RULES:\n`;
+  p+=`- Use ONLY the facts, numbers and references I provide. Do NOT invent data or citations.\n`;
+  p+=`- Keep an academic, precise, non-promotional tone.\n`;
+  p+=`- Flag anything that looks unsupported or needs a citation with [CHECK].\n`;
+  if(con) p+=`- ${con}\n`;
+  p+=`\nThen, after the draft, list 3 questions a critical peer reviewer would ask about this section.`;
+  document.getElementById('b_out').textContent=p;
+}
+function copyOut(id){
+  const txt=document.getElementById(id).textContent;
+  navigator.clipboard.writeText(txt).then(()=>{event.target.textContent='✅ Copied!';
+    setTimeout(()=>event.target.textContent='📋 Copy prompt',1500);});
+}
+
+// ethics checklist
+const items=[
+  ['I verified every citation exists','Checked each reference in PubMed / the actual journal'],
+  ['No fabricated data or results','Every number traces back to my real analysis'],
+  ['AI is NOT listed as an author','AI cannot take responsibility, so cannot be an author'],
+  ['I disclosed AI use as required','Per the journal\'s & ICMJE AI policy, in methods/acknowledgements'],
+  ['No confidential/patient data in public tools','Used de-identified data or an approved private tool'],
+  ['Every claim is supported by my data','No AI-added conclusions beyond what I can defend'],
+  ['I read & edited every AI sentence','The final voice and accuracy are mine'],
+  ['Originality / plagiarism checked','Ran the text through a similarity checker'],
+];
+const cc=document.getElementById('checks');
+items.forEach((it,i)=>{
+  const d=document.createElement('label');d.className='check';
+  d.innerHTML=`<input type="checkbox"><span><b>${it[0]}</b><small>${it[1]}</small></span>`;
+  d.querySelector('input').onchange=updateScore;
+  cc.appendChild(d);
+});
+function updateScore(){
+  const all=document.querySelectorAll('#checks input');
+  let n=0;all.forEach(c=>{c.closest('.check').classList.toggle('ticked',c.checked);if(c.checked)n++;});
+  document.getElementById('ebar').style.width=(n/all.length*100)+'%';
+  document.getElementById('escore').textContent=`${n} / ${all.length} complete`
+    +(n===all.length?' — ✅ ready to submit!':'');
+}
+
+// prompt library
+const lib=[
+  ['Harsh peer reviewer','Act as a critical Reviewer 2 for a top journal in my field. Read the manuscript below and list: (1) the 3 biggest weaknesses, (2) missing analyses or controls, (3) over-claims not supported by the data, (4) unclear passages. Be specific and tough but constructive.\n\n[PASTE MANUSCRIPT]'],
+  ['Tighten to word limit','Reduce the text below to under [X] words without losing any scientific content, numbers, or citations. Keep academic tone. Show the trimmed version only.\n\n[PASTE TEXT]'],
+  ['Improve clarity','Rewrite the passage below for clarity and flow for an international academic audience. Keep all facts, numbers and references unchanged. Do not add new claims. Mark anything ambiguous with [CHECK].\n\n[PASTE TEXT]'],
+  ['Abstract from full paper','Draft a structured abstract (Background, Methods, Results, Conclusions) under 250 words using ONLY the content of the manuscript below. Do not introduce any number or claim not present in the text.\n\n[PASTE PAPER]'],
+  ['Response to reviewers','Help me write a point-by-point response to these reviewer comments. For each: restate the comment, draft a polite professional reply, and note what manuscript change it implies. Do not concede points my data actually support.\n\n[PASTE COMMENTS]'],
+  ['Cover letter','Write a concise cover letter to the Editor of [JOURNAL] for my manuscript titled "[TITLE]". State the key finding, why it fits the journal\'s scope and readership, and confirm originality and no concurrent submission. Professional, 1 paragraph.'],
+  ['Plain-language summary','Write a 100-word plain-language summary of the findings below for patients and the general public. No jargon, accurate, no overstatement.\n\n[PASTE FINDINGS]'],
+  ['Logic & consistency check','Check the manuscript below for internal consistency: do the abstract, results and conclusions agree? Are any numbers contradictory between text, tables and abstract? List discrepancies only.\n\n[PASTE MANUSCRIPT]'],
+];
+const lb=document.getElementById('lib');
+lib.forEach(p=>{
+  const d=document.createElement('div');d.className='card';d.style.margin='10px 0';d.style.cursor='pointer';
+  d.innerHTML=`<h3 style="margin:0 0 6px">📋 ${p[0]}</h3><div class="out" style="margin:0">${p[1].replace(/</g,'&lt;')}</div>`;
+  d.onclick=()=>navigator.clipboard.writeText(p[1]).then(()=>{
+    const h=d.querySelector('h3');const o=h.textContent;h.textContent='✅ Copied!';
+    setTimeout(()=>h.textContent=o,1300);});
+  lb.appendChild(d);
+});
+updateScore();
+</script>
+</body>
+</html>
